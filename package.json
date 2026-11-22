@@ -1,0 +1,1 @@
+{"name":"linkscale-poc","private":true,"scripts":{"test":"npm --prefix backend test","dev":"docker compose up --build"}}

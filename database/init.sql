@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS urls (
+  id BIGSERIAL PRIMARY KEY,
+  short_code VARCHAR(16) NOT NULL UNIQUE,
+  original_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  click_count BIGINT NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS urls_created_at_idx ON urls(created_at DESC);

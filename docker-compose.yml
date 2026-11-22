@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: linkscale
+      POSTGRES_PASSWORD: linkscale_dev
+      POSTGRES_DB: linkscale
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkscale -d linkscale"]
+      interval: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://linkscale:linkscale_dev@db:5432/linkscale
+      REDIS_URL: redis://redis:6379
+      PUBLIC_BASE_URL: http://localhost:3000
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3000:3000"
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on: [backend]
+volumes:
+  pgdata:
